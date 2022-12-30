@@ -11,24 +11,33 @@ public class TimeManager_E : MonoBehaviour
 
     private void Update()
     {
-        playTime += Time.deltaTime;
-        
-        int sec = ((int)(playTime * 100) / 100) % 60;
-        int min = ((int)(playTime * 100) / 100) / 60;
-
-        string single_digit_sec = "";
-        string single_digit_min = "";
-
-        if (sec < 10)
+        if (!GameManager_E.Instance.bossSpawn)
         {
-            single_digit_sec = "0";
-        }
+            playTime += Time.deltaTime * 10;
 
-        if (min < 10)
-        {
-            single_digit_min = "0";
-        }
+            int sec = ((int)(playTime * 100) / 100) % 60;
+            int min = ((int)(playTime * 100) / 100) / 60;
 
-        timer.text = single_digit_min + min + ":" + single_digit_sec + sec;
+            string single_digit_sec = "";
+            string single_digit_min = "";
+
+            if (sec < 10)
+            {
+                single_digit_sec = "0";
+            }
+
+            if (min < 10)
+            {
+                single_digit_min = "0";
+            }
+
+            timer.text = single_digit_min + min + ":" + single_digit_sec + sec;
+
+            if (min == 1 && sec == 30)
+            {
+                // 1분 30초 -> 보물상자 생성
+                GameManager_E.Instance.treasureSpawner.TreasureSpawn();
+            }
+        }            
     }
 }

@@ -24,12 +24,13 @@ public class Stat
     // (치명타 확률)
 
     public float HP = 100; // 체력
+
     public float ATK = 10; // 공격력
     public float DEF = 10; // 방어력
     public float Speed = 15; // 이동속도
 }
 
-struct RotData
+public struct RotData
 {
     public float angle;
     public float rotDir;
@@ -65,7 +66,9 @@ public class Player_E : MonoBehaviour
 
     Coroutine coroutine; // 공격 코루틴 저장
 
-    public Slider hpBar;
+    public Slider hpBar; // hp바
+
+    public Transform TreasureDir; // 보물상자 방향
 
     public void ChangeState(STATE s)
     {
@@ -91,7 +94,13 @@ public class Player_E : MonoBehaviour
                 Attack();
                 if (myStatus.HP <= 0)
                 {
+                    // 체력이 0이 되어 죽은 경우
                     ChangeState(STATE.Die);
+                }                
+                if(GameManager_E.Instance.treasureSpawner.IsTreasureSpawn)
+                {
+                    // 보물상자가 드랍된 경우
+                    FindTreasure();
                 }
                 break;
             case STATE.Die:                
@@ -194,7 +203,7 @@ public class Player_E : MonoBehaviour
 
     IEnumerator Shotting()
     {
-        while (detect.monsters.Count > 0)
+        while (detect.monsters.Count > 0 && myState == STATE.Play)
         {
             SPUM.PlayAnimation(5); // attack
 
@@ -213,12 +222,29 @@ public class Player_E : MonoBehaviour
             CalculateAngle(this.transform, dir, out attackData);
 
             clone.transform.rotation = Quaternion.Euler(new Vector3(0, 0, attackData.angle * attackData.rotDir));
-            AttackDir.transform.rotation = Quaternion.Euler(new Vector3(0, 0, attackData.angle * attackData.rotDir));
+            AttackDir.transform.rotation = Quaternion.Euler(new Vector3(0, 0, attackData.angle * attackData.rotDir)); // 공격 방향을 알려주는 화살표
 
             yield return new WaitForSeconds(GameManager_E.Instance.projectileShotTime);
         }
 
         coroutine = null;
+    }
+
+    public void FindTreasure()
+    {
+        TreasureDir.gameObject.SetActive(true); // 오브젝트 활성화
+
+        Vector3 dir = GameManager_E.Instance.treasureSpawner.curSpawnPos - this.transform.position;
+        RotData treasureData;
+
+        CalculateAngle(this.transform, dir, out treasureData);
+        TreasureDir.rotation = Quaternion.Euler(new Vector3(0, 0, treasureData.angle * treasureData.rotDir));
+    }
+
+    public void GetTreasure()
+    {
+        // 보물을 얻었을 때 동작
+        TreasureDir.gameObject.SetActive(false); // 오브젝트 비활성화
     }
 }
 
